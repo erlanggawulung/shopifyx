@@ -6,10 +6,14 @@ package db
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 type Querier interface {
+	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	GetProduct(ctx context.Context, id uuid.UUID) (Product, error)
 	GetUser(ctx context.Context, username string) (User, error)
 }
 
