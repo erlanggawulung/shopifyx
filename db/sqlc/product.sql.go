@@ -60,6 +60,30 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 	return i, err
 }
 
+const deleteProduct = `-- name: DeleteProduct :one
+DELETE FROM products
+WHERE
+  id = $1
+RETURNING id, name, price, image_url, stock, condition, tags, is_purchaseable, created_at
+`
+
+func (q *Queries) DeleteProduct(ctx context.Context, id uuid.UUID) (Product, error) {
+	row := q.db.QueryRowContext(ctx, deleteProduct, id)
+	var i Product
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Price,
+		&i.ImageUrl,
+		&i.Stock,
+		&i.Condition,
+		&i.Tags,
+		&i.IsPurchaseable,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const getProduct = `-- name: GetProduct :one
 SELECT id, name, price, image_url, stock, condition, tags, is_purchaseable, created_at FROM products
 WHERE id = $1 LIMIT 1

@@ -39,6 +39,7 @@ func (server *Server) setupRouter() {
 		v1.POST("/user/login", server.loginUser)
 		v1.POST("/product", authMiddleware(server.tokenMaker), server.postProduct)
 		v1.PATCH("/product/:id", authMiddleware(server.tokenMaker), server.patchProduct)
+		v1.DELETE("/product/:id", authMiddleware(server.tokenMaker), server.deleteProduct)
 	}
 
 	server.router = router

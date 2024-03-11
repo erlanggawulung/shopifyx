@@ -1,6 +1,7 @@
 package api
 
 import (
+	"database/sql"
 	"net/http"
 
 	db "github.com/erlanggawulung/shopifyx/db/sqlc"
@@ -25,14 +26,8 @@ func (server *Server) postProduct(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	tags := ""
-	for i, tag := range req.Tags {
-		if i == len(req.Tags)-1 {
-			tags += tag
-		} else {
-			tags += tag + ","
-		}
-	}
+
+	tags := sliceToString(req.Tags)
 	productArg := db.CreateProductParams{
 		Name:           req.Name,
 		Price:          int32(req.Price),
@@ -49,7 +44,7 @@ func (server *Server) postProduct(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, "")
+	ctx.JSON(http.StatusOK, gin.H{})
 }
 
 type patchProductRequest struct {
@@ -80,14 +75,8 @@ func (server *Server) patchProduct(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	tags := ""
-	for i, tag := range req.Tags {
-		if i == len(req.Tags)-1 {
-			tags += tag
-		} else {
-			tags += tag + ","
-		}
-	}
+
+	tags := sliceToString(req.Tags)
 	productArg := db.UpdateProductParams{
 		ID:             req.ID,
 		Name:           req.Name,
@@ -101,9 +90,47 @@ func (server *Server) patchProduct(ctx *gin.Context) {
 
 	_, err = server.store.UpdateProduct(ctx, productArg)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
-	ctx.JSON(http.StatusOK, "")
+	ctx.JSON(http.StatusOK, gin.H{})
+}
+
+func (server *Server) deleteProduct(ctx *gin.Context) {
+	// Extract the ID from the URI parameters
+	idStr := ctx.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	_, err = server.store.DeleteProduct(ctx, id)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{})
+}
+
+func sliceToString(slice []string) string {
+	results := ""
+	for i, tag := range slice {
+		if i == len(slice)-1 {
+			results += tag
+		} else {
+			results += tag + ","
+		}
+	}
+	return results
 }

@@ -13,6 +13,7 @@ import (
 type Querier interface {
 	CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
+	DeleteProduct(ctx context.Context, id uuid.UUID) (Product, error)
 	GetProduct(ctx context.Context, id uuid.UUID) (Product, error)
 	GetUser(ctx context.Context, username string) (User, error)
 	UpdateProduct(ctx context.Context, arg UpdateProductParams) (Product, error)

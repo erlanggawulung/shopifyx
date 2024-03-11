@@ -25,6 +25,12 @@ WHERE
   id = $1
 RETURNING *;
 
+-- name: DeleteProduct :one
+DELETE FROM products
+WHERE
+  id = $1
+RETURNING *;
+
 -- name: GetProduct :one
 SELECT * FROM products
 WHERE id = $1 LIMIT 1;
