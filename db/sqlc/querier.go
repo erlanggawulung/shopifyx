@@ -15,6 +15,7 @@ type Querier interface {
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	GetProduct(ctx context.Context, id uuid.UUID) (Product, error)
 	GetUser(ctx context.Context, username string) (User, error)
+	UpdateProduct(ctx context.Context, arg UpdateProductParams) (Product, error)
 }
 
 var _ Querier = (*Queries)(nil)
