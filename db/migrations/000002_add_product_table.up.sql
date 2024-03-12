@@ -7,5 +7,6 @@ CREATE TABLE "products" (
   "condition" VARCHAR NOT NULL,
   "tags" TEXT NOT NULL,
   "is_purchaseable" BOOLEAN NOT NULL,
+  "created_by" UUID NOT NULL,
   "created_at" timestamptz NOT NULL DEFAULT NOW()
 );

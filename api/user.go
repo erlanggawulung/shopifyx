@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	tokenDuration = 15 * time.Minute
+	tokenDuration = 24 * time.Hour
 )
 
 type registerUserRequest struct {

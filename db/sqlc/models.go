@@ -10,6 +10,15 @@ import (
 	"github.com/google/uuid"
 )
 
+type BankAccount struct {
+	ID                uuid.UUID `json:"id"`
+	UserID            uuid.UUID `json:"user_id"`
+	BankName          string    `json:"bank_name"`
+	BankAccountName   string    `json:"bank_account_name"`
+	BankAccountNumber string    `json:"bank_account_number"`
+	CreatedAt         time.Time `json:"created_at"`
+}
+
 type Product struct {
 	ID             uuid.UUID `json:"id"`
 	Name           string    `json:"name"`
@@ -19,6 +28,7 @@ type Product struct {
 	Condition      string    `json:"condition"`
 	Tags           string    `json:"tags"`
 	IsPurchaseable bool      `json:"is_purchaseable"`
+	CreatedBy      uuid.UUID `json:"created_by"`
 	CreatedAt      time.Time `json:"created_at"`
 }
 

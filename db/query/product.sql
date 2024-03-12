@@ -6,9 +6,10 @@ INSERT INTO products (
   stock,
   condition,
   tags,
-  is_purchaseable
+  is_purchaseable,
+  created_by
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7
+  $1, $2, $3, $4, $5, $6, $7, $8
 ) RETURNING *;
 
 -- name: UpdateProduct :one
@@ -25,6 +26,14 @@ WHERE
   id = $1
 RETURNING *;
 
+-- name: UpdateProductStock :one
+UPDATE products
+SET
+  stock = $2
+WHERE
+  id = $1
+RETURNING *;
+
 -- name: DeleteProduct :one
 DELETE FROM products
 WHERE
@@ -34,3 +43,9 @@ RETURNING *;
 -- name: GetProduct :one
 SELECT * FROM products
 WHERE id = $1 LIMIT 1;
+
+-- name: ListProducts :one
+SELECT * FROM products
+ORDER BY id
+LIMIT $1
+OFFSET $2;

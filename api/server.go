@@ -37,9 +37,14 @@ func (server *Server) setupRouter() {
 	{
 		v1.POST("/user/register", server.registerUser)
 		v1.POST("/user/login", server.loginUser)
+
 		v1.POST("/product", authMiddleware(server.tokenMaker), server.postProduct)
 		v1.PATCH("/product/:id", authMiddleware(server.tokenMaker), server.patchProduct)
 		v1.DELETE("/product/:id", authMiddleware(server.tokenMaker), server.deleteProduct)
+		v1.POST("/product/:id/stock", authMiddleware(server.tokenMaker), server.postProductStock)
+
+		v1.POST("/bank/account", authMiddleware(server.tokenMaker), server.postBankAccount)
+		v1.GET("/bank/account", authMiddleware(server.tokenMaker), server.getBankAccountByUserId)
 	}
 
 	server.router = router

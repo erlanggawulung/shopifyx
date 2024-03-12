@@ -19,20 +19,22 @@ INSERT INTO products (
   stock,
   condition,
   tags,
-  is_purchaseable
+  is_purchaseable,
+  created_by
 ) VALUES (
-  $1, $2, $3, $4, $5, $6, $7
-) RETURNING id, name, price, image_url, stock, condition, tags, is_purchaseable, created_at
+  $1, $2, $3, $4, $5, $6, $7, $8
+) RETURNING id, name, price, image_url, stock, condition, tags, is_purchaseable, created_by, created_at
 `
 
 type CreateProductParams struct {
-	Name           string `json:"name"`
-	Price          int32  `json:"price"`
-	ImageUrl       string `json:"image_url"`
-	Stock          int32  `json:"stock"`
-	Condition      string `json:"condition"`
-	Tags           string `json:"tags"`
-	IsPurchaseable bool   `json:"is_purchaseable"`
+	Name           string    `json:"name"`
+	Price          int32     `json:"price"`
+	ImageUrl       string    `json:"image_url"`
+	Stock          int32     `json:"stock"`
+	Condition      string    `json:"condition"`
+	Tags           string    `json:"tags"`
+	IsPurchaseable bool      `json:"is_purchaseable"`
+	CreatedBy      uuid.UUID `json:"created_by"`
 }
 
 func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (Product, error) {
@@ -44,6 +46,7 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 		arg.Condition,
 		arg.Tags,
 		arg.IsPurchaseable,
+		arg.CreatedBy,
 	)
 	var i Product
 	err := row.Scan(
@@ -55,6 +58,7 @@ func (q *Queries) CreateProduct(ctx context.Context, arg CreateProductParams) (P
 		&i.Condition,
 		&i.Tags,
 		&i.IsPurchaseable,
+		&i.CreatedBy,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -64,7 +68,7 @@ const deleteProduct = `-- name: DeleteProduct :one
 DELETE FROM products
 WHERE
   id = $1
-RETURNING id, name, price, image_url, stock, condition, tags, is_purchaseable, created_at
+RETURNING id, name, price, image_url, stock, condition, tags, is_purchaseable, created_by, created_at
 `
 
 func (q *Queries) DeleteProduct(ctx context.Context, id uuid.UUID) (Product, error) {
@@ -79,13 +83,14 @@ func (q *Queries) DeleteProduct(ctx context.Context, id uuid.UUID) (Product, err
 		&i.Condition,
 		&i.Tags,
 		&i.IsPurchaseable,
+		&i.CreatedBy,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getProduct = `-- name: GetProduct :one
-SELECT id, name, price, image_url, stock, condition, tags, is_purchaseable, created_at FROM products
+SELECT id, name, price, image_url, stock, condition, tags, is_purchaseable, created_by, created_at FROM products
 WHERE id = $1 LIMIT 1
 `
 
@@ -101,6 +106,37 @@ func (q *Queries) GetProduct(ctx context.Context, id uuid.UUID) (Product, error)
 		&i.Condition,
 		&i.Tags,
 		&i.IsPurchaseable,
+		&i.CreatedBy,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const listProducts = `-- name: ListProducts :one
+SELECT id, name, price, image_url, stock, condition, tags, is_purchaseable, created_by, created_at FROM products
+ORDER BY id
+LIMIT $1
+OFFSET $2
+`
+
+type ListProductsParams struct {
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
+}
+
+func (q *Queries) ListProducts(ctx context.Context, arg ListProductsParams) (Product, error) {
+	row := q.db.QueryRowContext(ctx, listProducts, arg.Limit, arg.Offset)
+	var i Product
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Price,
+		&i.ImageUrl,
+		&i.Stock,
+		&i.Condition,
+		&i.Tags,
+		&i.IsPurchaseable,
+		&i.CreatedBy,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -118,7 +154,7 @@ SET
   is_purchaseable = $8
 WHERE
   id = $1
-RETURNING id, name, price, image_url, stock, condition, tags, is_purchaseable, created_at
+RETURNING id, name, price, image_url, stock, condition, tags, is_purchaseable, created_by, created_at
 `
 
 type UpdateProductParams struct {
@@ -153,6 +189,39 @@ func (q *Queries) UpdateProduct(ctx context.Context, arg UpdateProductParams) (P
 		&i.Condition,
 		&i.Tags,
 		&i.IsPurchaseable,
+		&i.CreatedBy,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const updateProductStock = `-- name: UpdateProductStock :one
+UPDATE products
+SET
+  stock = $2
+WHERE
+  id = $1
+RETURNING id, name, price, image_url, stock, condition, tags, is_purchaseable, created_by, created_at
+`
+
+type UpdateProductStockParams struct {
+	ID    uuid.UUID `json:"id"`
+	Stock int32     `json:"stock"`
+}
+
+func (q *Queries) UpdateProductStock(ctx context.Context, arg UpdateProductStockParams) (Product, error) {
+	row := q.db.QueryRowContext(ctx, updateProductStock, arg.ID, arg.Stock)
+	var i Product
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Price,
+		&i.ImageUrl,
+		&i.Stock,
+		&i.Condition,
+		&i.Tags,
+		&i.IsPurchaseable,
+		&i.CreatedBy,
 		&i.CreatedAt,
 	)
 	return i, err
