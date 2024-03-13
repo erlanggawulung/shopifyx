@@ -48,6 +48,34 @@ func (q *Queries) CreateBankAccount(ctx context.Context, arg CreateBankAccountPa
 	return i, err
 }
 
+const deleteBankAccount = `-- name: DeleteBankAccount :one
+DELETE FROM bank_accounts
+WHERE
+  id = $1
+  AND 
+  user_id = $2
+RETURNING id, user_id, bank_name, bank_account_name, bank_account_number, created_at
+`
+
+type DeleteBankAccountParams struct {
+	ID     uuid.UUID `json:"id"`
+	UserID uuid.UUID `json:"user_id"`
+}
+
+func (q *Queries) DeleteBankAccount(ctx context.Context, arg DeleteBankAccountParams) (BankAccount, error) {
+	row := q.db.QueryRowContext(ctx, deleteBankAccount, arg.ID, arg.UserID)
+	var i BankAccount
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.BankName,
+		&i.BankAccountName,
+		&i.BankAccountNumber,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const getBankAccountsByUserId = `-- name: GetBankAccountsByUserId :many
 SELECT id, bank_name, bank_account_name, bank_account_number FROM bank_accounts
 WHERE user_id = $1
@@ -86,4 +114,45 @@ func (q *Queries) GetBankAccountsByUserId(ctx context.Context, userID uuid.UUID)
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateBankAccount = `-- name: UpdateBankAccount :one
+UPDATE bank_accounts
+SET
+  bank_name = $3,
+  bank_account_name = $4,
+  bank_account_number = $5
+WHERE
+  id = $1
+  AND 
+  user_id = $2
+RETURNING id, user_id, bank_name, bank_account_name, bank_account_number, created_at
+`
+
+type UpdateBankAccountParams struct {
+	ID                uuid.UUID `json:"id"`
+	UserID            uuid.UUID `json:"user_id"`
+	BankName          string    `json:"bank_name"`
+	BankAccountName   string    `json:"bank_account_name"`
+	BankAccountNumber string    `json:"bank_account_number"`
+}
+
+func (q *Queries) UpdateBankAccount(ctx context.Context, arg UpdateBankAccountParams) (BankAccount, error) {
+	row := q.db.QueryRowContext(ctx, updateBankAccount,
+		arg.ID,
+		arg.UserID,
+		arg.BankName,
+		arg.BankAccountName,
+		arg.BankAccountNumber,
+	)
+	var i BankAccount
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.BankName,
+		&i.BankAccountName,
+		&i.BankAccountNumber,
+		&i.CreatedAt,
+	)
+	return i, err
 }

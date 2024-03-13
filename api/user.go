@@ -78,7 +78,7 @@ func (server *Server) registerUser(ctx *gin.Context) {
 		return
 	}
 
-	accessToken, _, err := server.tokenMaker.CreateToken(req.Username, tokenDuration)
+	accessToken, _, err := server.tokenMaker.CreateToken(req.Username, user.ID, tokenDuration)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
@@ -108,7 +108,8 @@ func (server *Server) loginUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
-	accessToken, _, err := server.tokenMaker.CreateToken(req.Username, tokenDuration)
+	log.Print(user.ID)
+	accessToken, _, err := server.tokenMaker.CreateToken(req.Username, user.ID, tokenDuration)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return

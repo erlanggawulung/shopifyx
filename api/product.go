@@ -34,7 +34,7 @@ func (server *Server) postProduct(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Value is not a map"})
 		return
 	}
-	userId := payload.ID
+	userId := payload.UserId
 	productArg := db.CreateProductParams{
 		Name:           req.Name,
 		Price:          int32(req.Price),

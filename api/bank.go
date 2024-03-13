@@ -1,6 +1,8 @@
 package api
 
 import (
+	"database/sql"
+	"log"
 	"net/http"
 
 	db "github.com/erlanggawulung/shopifyx/db/sqlc"
@@ -31,7 +33,7 @@ func (server *Server) postBankAccount(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Value is not a map"})
 		return
 	}
-	userId := payload.ID
+	userId := payload.UserId
 	bankArg := db.CreateBankAccountParams{
 		BankName:          req.BankName,
 		BankAccountName:   req.BankAccountName,
@@ -66,7 +68,7 @@ func (server *Server) getBankAccountByUserId(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Value is not a map"})
 		return
 	}
-	userId := payload.ID
+	userId := payload.UserId
 
 	bankAccounts, err := server.store.GetBankAccountsByUserId(ctx, userId)
 	if err != nil {
@@ -94,4 +96,38 @@ func generateBankAccountsResponse(bankAccounts []db.GetBankAccountsByUserIdRow) 
 		results = append(results, bankAcc)
 	}
 	return results
+}
+
+func (server *Server) deleteBankAccount(ctx *gin.Context) {
+	// Extract the ID from the URI parameters
+	idStr := ctx.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	payload, ok := getContextVal(ctx, authorizationPayloadKey)
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Value is not a map"})
+		return
+	}
+	userId := payload.UserId
+
+	deleteBankAccountArg := db.DeleteBankAccountParams{
+		ID:     id,
+		UserID: userId,
+	}
+	log.Print(deleteBankAccountArg)
+	_, err = server.store.DeleteBankAccount(ctx, deleteBankAccountArg)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{})
 }

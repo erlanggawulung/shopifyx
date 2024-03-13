@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/google/uuid"
 )
 
 const minSecretKey = 32
@@ -14,8 +15,8 @@ type JWTMaker struct {
 	secretKey string
 }
 
-func (maker *JWTMaker) CreateToken(username string, duration time.Duration) (string, *Payload, error) {
-	payload, err := NewPayload(username, duration)
+func (maker *JWTMaker) CreateToken(username string, userID uuid.UUID, duration time.Duration) (string, *Payload, error) {
+	payload, err := NewPayload(username, userID, duration)
 	if err != nil {
 		return "", nil, err
 	}
