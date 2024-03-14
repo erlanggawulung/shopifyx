@@ -46,6 +46,8 @@ func (server *Server) setupRouter() {
 		v1.POST("/bank/account", authMiddleware(server.tokenMaker), server.postBankAccount)
 		v1.GET("/bank/account", authMiddleware(server.tokenMaker), server.getBankAccountByUserId)
 		v1.DELETE("/bank/account/:id", authMiddleware(server.tokenMaker), server.deleteBankAccount)
+
+		v1.POST("/image", authMiddleware(server.tokenMaker), server.postImage)
 	}
 
 	server.router = router
