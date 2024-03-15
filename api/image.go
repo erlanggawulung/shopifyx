@@ -101,6 +101,7 @@ func uploadToS3(file io.Reader, fileNameWithExt string, config util.Config) (str
 		Bucket: aws.String(config.S3BaseURL),
 		Key:    aws.String(fileNameWithExt),
 		Body:   bytes.NewReader(buf.Bytes()),
+		ACL:    aws.String("public-read"),
 	}
 
 	// Upload the file to S3
