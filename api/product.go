@@ -200,3 +200,7 @@ func getContextVal(ctx *gin.Context, ctxKey string) (*token.Payload, bool) {
 	value, ok := ctx.Get(ctxKey)
 	return value.(*token.Payload), ok
 }
+
+func (server *Server) postBuyProduct(ctx *gin.Context) {
+
+}

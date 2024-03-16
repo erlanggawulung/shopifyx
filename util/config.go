@@ -1,6 +1,8 @@
 package util
 
-import "github.com/spf13/viper"
+import (
+	"github.com/spf13/viper"
+)
 
 type Config struct {
 	DBName            string `mapstructure:"DB_NAME"`
@@ -16,7 +18,8 @@ type Config struct {
 	S3BaseURL         string `mapstructure:"S3_BASE_URL"`
 }
 
-func LoadConfig(path string) (Config, error) {
+// Load Config from file
+/*func LoadConfig(path string) (Config, error) {
 	var config Config
 
 	viper.AddConfigPath(path)
@@ -32,4 +35,27 @@ func LoadConfig(path string) (Config, error) {
 
 	err = viper.Unmarshal(&config)
 	return config, err
+}*/
+
+// Load Config from Environment Variables
+func LoadConfig(path string) (Config, error) {
+	config := generateConfigFromEnvVars()
+	return config, nil
+}
+
+func generateConfigFromEnvVars() Config {
+	viper.AutomaticEnv()
+	return Config{
+		DBName:            viper.GetString("DB_NAME"),
+		DBPort:            viper.GetString("DB_PORT"),
+		DBHost:            viper.GetString("DB_HOST"),
+		DBUsername:        viper.GetString("DB_USERNAME"),
+		DBPassword:        viper.GetString("DB_PASSWORD"),
+		PromotheusAddress: viper.GetString("PROMOTHEUS_ADDRESS"),
+		JWTSecret:         viper.GetString("JWT_SECRET"),
+		BcryptSalt:        viper.GetString("BCRYPT_SALT"),
+		S3ID:              viper.GetString("S3_ID"),
+		S3SecretKey:       viper.GetString("S3_SECRET_KEY"),
+		S3BaseURL:         viper.GetString("S3_BASE_URL"),
+	}
 }
