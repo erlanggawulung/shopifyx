@@ -1,6 +1,8 @@
 package util
 
 import (
+	"os"
+
 	"github.com/spf13/viper"
 )
 
@@ -10,20 +12,29 @@ type Config struct {
 	DBHost            string `mapstructure:"DB_HOST"`
 	DBUsername        string `mapstructure:"DB_USERNAME"`
 	DBPassword        string `mapstructure:"DB_PASSWORD"`
+	SSLMode           string `mapstructure:"SSL_MODE"`
+	SSLRootCert       string `mapstructure:"SSL_ROOT_CERT"`
 	PromotheusAddress string `mapstructure:"PROMETHEUS_ADDRESS"`
 	JWTSecret         string `mapstructure:"JWT_SECRET"`
 	BcryptSalt        string `mapstructure:"BCRYPT_SALT"`
 	S3ID              string `mapstructure:"S3_ID"`
 	S3SecretKey       string `mapstructure:"S3_SECRET_KEY"`
-	S3BaseURL         string `mapstructure:"S3_BASE_URL"`
+	S3BucketName      string `mapstructure:"S3_BUCKET_NAME"`
 }
 
-// Load Config from file
-/*func LoadConfig(path string) (Config, error) {
+func LoadConfig(path string) (Config, error) {
+	config, err := LoadConfigFromFile(path)
+	if os.Getenv("ENV") == "production" {
+		return generateConfigFromEnvVars(), nil
+	}
+	return config, err
+}
+
+func LoadConfigFromFile(path string) (Config, error) {
 	var config Config
 
 	viper.AddConfigPath(path)
-	viper.SetConfigName("app")
+	viper.SetConfigName("local")
 	viper.SetConfigType("env")
 
 	viper.AutomaticEnv()
@@ -35,12 +46,6 @@ type Config struct {
 
 	err = viper.Unmarshal(&config)
 	return config, err
-}*/
-
-// Load Config from Environment Variables
-func LoadConfig(path string) (Config, error) {
-	config := generateConfigFromEnvVars()
-	return config, nil
 }
 
 func generateConfigFromEnvVars() Config {
@@ -51,11 +56,13 @@ func generateConfigFromEnvVars() Config {
 		DBHost:            viper.GetString("DB_HOST"),
 		DBUsername:        viper.GetString("DB_USERNAME"),
 		DBPassword:        viper.GetString("DB_PASSWORD"),
+		SSLMode:           viper.GetString("SSL_MODE"),
+		SSLRootCert:       viper.GetString("SSL_ROOT_CERT"),
 		PromotheusAddress: viper.GetString("PROMOTHEUS_ADDRESS"),
 		JWTSecret:         viper.GetString("JWT_SECRET"),
 		BcryptSalt:        viper.GetString("BCRYPT_SALT"),
 		S3ID:              viper.GetString("S3_ID"),
 		S3SecretKey:       viper.GetString("S3_SECRET_KEY"),
-		S3BaseURL:         viper.GetString("S3_BASE_URL"),
+		S3BucketName:      viper.GetString("S3_BUCKET_NAME"),
 	}
 }

@@ -98,7 +98,7 @@ func uploadToS3(file io.Reader, fileNameWithExt string, config util.Config) (str
 
 	// Prepare the parameters for the S3 upload
 	params := &s3.PutObjectInput{
-		Bucket: aws.String(config.S3BaseURL),
+		Bucket: aws.String(config.S3BucketName),
 		Key:    aws.String(fileNameWithExt),
 		Body:   bytes.NewReader(buf.Bytes()),
 		ACL:    aws.String("public-read"),
@@ -111,7 +111,7 @@ func uploadToS3(file io.Reader, fileNameWithExt string, config util.Config) (str
 	}
 
 	// Construct the URL to access the uploaded file
-	url := fmt.Sprintf("https://%s.s3.amazonaws.com/%s", config.S3BaseURL, fileNameWithExt)
+	url := fmt.Sprintf("https://%s.s3.amazonaws.com/%s", config.S3BucketName, fileNameWithExt)
 
 	return url, nil
 }

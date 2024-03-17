@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/erlanggawulung/shopifyx/api"
 	db "github.com/erlanggawulung/shopifyx/db/sqlc"
@@ -17,9 +18,12 @@ func main() {
 		log.Fatal("can not load config:", err)
 	}
 
-	dbSource := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=disable",
-		config.DBUsername, config.DBPassword, config.DBHost, config.DBPort, config.DBName)
-
+	dbSource := fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=%s&sslrootcert=%s",
+		config.DBUsername, config.DBPassword, config.DBHost, config.DBPort, config.DBName, config.SSLMode, config.SSLRootCert)
+	if os.Getenv("ENV") == "production" {
+		dbSource = fmt.Sprintf("postgresql://%s:%s@%s:%s/%s?sslmode=verify-full&sslrootcert=ap-southeast-1-bundle.pem",
+			config.DBUsername, config.DBPassword, config.DBHost, config.DBPort, config.DBName)
+	}
 	conn, err := sql.Open("postgres", dbSource)
 	if err != nil {
 		log.Fatal("can not connect to db:", err)

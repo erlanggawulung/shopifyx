@@ -62,6 +62,7 @@ func (server *Server) setupRouter() {
 		NewRoute(v1, "/bank/account", http.MethodPost, authMiddleware(server.tokenMaker), server.postBankAccount)
 		NewRoute(v1, "/bank/account", http.MethodGet, authMiddleware(server.tokenMaker), server.getBankAccountByUserId)
 		NewRoute(v1, "/bank/account/:id", http.MethodDelete, authMiddleware(server.tokenMaker), server.deleteBankAccount)
+		NewRoute(v1, "/bank/account/:id", http.MethodPatch, authMiddleware(server.tokenMaker), server.patchBankAccount)
 
 		NewRoute(v1, "/image", http.MethodPost, authMiddleware(server.tokenMaker), server.postImage)
 	}

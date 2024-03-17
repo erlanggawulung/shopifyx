@@ -131,3 +131,53 @@ func (server *Server) deleteBankAccount(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{})
 }
+
+type patchBankAccountRequest struct {
+	BankAccountId     string `json:"bankAccountId" binding:"required"`
+	BankName          string `json:"bankName" binding:"required,min=5,max=15"`
+	BankAccountName   string `json:"bankAccountName" binding:"required,min=5,max=15"`
+	BankAccountNumber string `json:"bankAccountNumber" binding:"required,min=5,max=15"`
+}
+
+func (server *Server) patchBankAccount(ctx *gin.Context) {
+	// Extract the ID from the URI parameters
+	idStr := ctx.Param("id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	var req patchBankAccountRequest
+	err = ctx.ShouldBindJSON(&req)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	payload, ok := getContextVal(ctx, authorizationPayloadKey)
+	if !ok {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Value is not a map"})
+		return
+	}
+	userId := payload.UserId
+
+	updateBankAccArg := db.UpdateBankAccountParams{
+		ID:                id,
+		UserID:            userId,
+		BankName:          req.BankName,
+		BankAccountName:   req.BankAccountName,
+		BankAccountNumber: req.BankAccountNumber,
+	}
+	_, err = server.store.UpdateBankAccount(ctx, updateBankAccArg)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, errorResponse(err))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{})
+}
